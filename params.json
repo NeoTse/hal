@@ -1,0 +1,14 @@
+{
+ "Initialized": false,
+ "OpenaiKey": "",
+ "ChatgptModel": "gpt-3.5-turbo",
+ "MaxHistory": 4,
+ "SpeechKey": "",
+ "SpeechRegion": "",
+ "Language": "",
+ "Voice": "",
+ "StopWord": "goodbye",
+ "Keyword": "harold",
+ "KeywordModel": "model/keyword.table",
+ "KeywordLanguage": "en-US"
+}
