@@ -16,6 +16,7 @@
 ```bash
 git clone https://www.github.com/neotse/hal
 cd hal
+chmod +x install.sh
 ./install.sh
 ```
 

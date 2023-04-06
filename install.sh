@@ -1,68 +1,68 @@
-#!/bin/bash
+#!/bin/sh
 
 set +x
 set -e
 
 SPEECHSDK_ROOT="$HOME/HAL/speechsdk"
-function installSpeechSDK() {
+installSpeechSDK () {
     echo "Install Azure Speech SDK into $SPEECHSDK_ROOT"
     sudo apt-get update
-    sudo apt-get install build-essential libssl-dev libasound2 wget
+    sudo apt-get install build-essential libssl-dev libasound2 wget -y
 
-    
     mkdir -p "$SPEECHSDK_ROOT"
     wget -O SpeechSDK-Linux.tar.gz https://aka.ms/csspeech/linuxbinary
     tar --strip 1 -xzf SpeechSDK-Linux.tar.gz -C "$SPEECHSDK_ROOT"
     
     arch=$(uname -m)
-    if [ "$arch" == "aarch64" ]; then
+    if [ $arch = "aarch64" ]; then
         arch="arm64"
-    elif [ "$arch" == "armv7l" ] || [ "$arch" == "armv6l" ]; then
+    elif [ $arch = "armv7l" ] || [ $arch = "armv6l" ]; then
         arch="arm32"
-    elif [ "$arch" == "x86_64" ]; then
+    elif [ $arch = "x86_64" ]; then
         arch="x64"
-    elif [ "$arch" == "x86" ] || [ "$arch" == "i686" ]; then
+    elif [ $arch = "x86" ] || [ $arch = "i686" ]; then
         arch="x86"
     else
         echo "Unsupport platform."
         exit 1
     fi
 
-    echo -ne 'export CGO_CFLAGS="-I$SPEECHSDK_ROOT/include/c_api"\n' >> $HOME/.profile
-    export CGO_CFLAGS="-I$SPEECHSDK_ROOT/include/c_api"
-
-    echo -ne 'CGO_LDFLAGS="-L$SPEECHSDK_ROOT/lib/$arch -lMicrosoft.CognitiveServices.Speech.core"\n' >> $HOME/.profile
-    export CGO_LDFLAGS="-L$SPEECHSDK_ROOT/lib/$arch -lMicrosoft.CognitiveServices.Speech.core"
-    
-    echo -ne 'LD_LIBRARY_PATH="$SPEECHSDK_ROOT/lib/$arch:$LD_LIBRARY_PATH"' >> $HOME/.profile
-    export LD_LIBRARY_PATH="$SPEECHSDK_ROOT/lib/$arch:$LD_LIBRARY_PATH"
-
+    echo >> $HOME/.profile
+    printf "SPEECHSDK_ROOT=\"\$HOME/HAL/speechsdk\"\n"  >> $HOME/.profile
+    printf "export CGO_CFLAGS=\"-I\$SPEECHSDK_ROOT/include/c_api\"\n"  >> $HOME/.profile
+    printf "export CGO_LDFLAGS=\"-L\$SPEECHSDK_ROOT/lib/%s -lMicrosoft.CognitiveServices.Speech.core\"\n" $arch >> $HOME/.profile
+    printf "export LD_LIBRARY_PATH=\"\$SPEECHSDK_ROOT/lib/%s:\$LD_LIBRARY_PATH\"\n" $arch >> $HOME/.profile
+    . $HOME/.profile
     rm -f SpeechSDK-Linux.tar.gz
-    echo "Install Azure Speech SDK Succeeded。"
+    echo "Install Azure Speech SDK Succeeded."
 }
 
-
-func installHAL() {
-    echo "Install HAL into ${install_path}"
-    git clone https://www.github.com/neotse/hal
-    cd hal
+HAL_ROOT="$HOME/HAL/go"
+installHAL () {
+    echo "Install HAL into ${HAL_ROOT}"
     go build cli/hal.go
-    if [ -d $install_path ]; then
-        echo "remove old HAL"
-        rm -rf $install_path
+    if [ -d $HAL_ROOT ]; then
+        echo "old HAL found, and remove it."
+        rm -rf $HAL_ROOT
     fi
 
-    mkdir ${install_path}
-    cp hal ${install_path}
-    cp params.json sessions.json hooks.json ${install_path}
-    cp -R ./model ${install_path}
+    mkdir -p ${HAL_ROOT}
+    cp hal ${HAL_ROOT}
+    cp params.json hooks.json ${HAL_ROOT}
+    cp -R ./model ${HAL_ROOT}
 
 
-    echo -ne 'PATH="$HAL_ROOT":$PATH' >> $HOME/.profile
-    export PATH="$HAL_ROOT":$PATH
+    existExport=$(grep HAL_ROOT $HOME/.profile)
+    if [ ${#existExport} -eq 0 ]; then
+        echo >> $HOME/.profile
+        printf "HAL_ROOT=\"\$HOME/HAL/go\"\n" >> $HOME/.profile
+        printf "export PATH=\"\$HAL_ROOT\":\$PATH\n" >> $HOME/.profile
+        . $HOME/.profile
+    fi
+    
     echo "Install HAL Succeeded."
 }
 
 
-[ ! -d "SPEECHSDK_ROOT" ] && installSpeechSDK
+[ ! -d "$SPEECHSDK_ROOT" ] && installSpeechSDK
 installHAL
