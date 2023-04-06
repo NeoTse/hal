@@ -24,7 +24,9 @@ installSpeechSDK () {
         arch="x86"
     else
         echo "Unsupport platform."
-        exit 1
+        rm -f SpeechSDK-Linux.tar.gz
+        rm -rf $SPEECHSDK_ROOT
+        return 1
     fi
 
     echo >> $HOME/.profile
@@ -65,4 +67,4 @@ installHAL () {
 
 
 [ ! -d "$SPEECHSDK_ROOT" ] && installSpeechSDK
-installHAL
+[ $? -eq 0 ] && installHAL

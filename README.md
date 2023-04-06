@@ -13,6 +13,8 @@
 
 ### 1. Install
 
+> require: go >= 1.18
+
 ```bash
 git clone https://github.com/neotse/hal.git
 cd hal
