@@ -46,7 +46,7 @@ func installHAL() {
     echo "Install HAL into ${install_path}"
     git clone https://www.github.com/neotse/hal
     cd hal
-    go build
+    go build cli/hal.go
     if [ -d $install_path ]; then
         echo "remove old HAL"
         rm -rf $install_path
