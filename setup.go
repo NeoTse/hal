@@ -51,12 +51,13 @@ func getOpenaiKey() string {
 			fmt.Printf("Current key: %s. Replace it by input new key or Press Enter keep it.\n", PARAMS.OpenaiKey)
 		}
 
-		key := readStringFromStdin()
+		key = readStringFromStdin()
 		if key == "" && PARAMS.OpenaiKey != "" {
 			return PARAMS.OpenaiKey
 		}
 
-		if !CheckOpenaiKey(key) {
+		err = CheckOpenaiKey(key)
+		if err != nil {
 			fmt.Printf("When attempt connect to openai use the provided key, an error occurred. Please check your key or network.\n ERROR: %s\n", err)
 		}
 	}
@@ -64,7 +65,7 @@ func getOpenaiKey() string {
 	return key
 }
 
-func CheckOpenaiKey(key string) bool {
+func CheckOpenaiKey(key string) error {
 	client := openai.NewClient(key)
 	_, err := client.CreateChatCompletion(
 		context.Background(),
@@ -79,7 +80,7 @@ func CheckOpenaiKey(key string) bool {
 		},
 	)
 
-	return err == nil
+	return err
 }
 
 func chooseModel() string {
@@ -156,6 +157,10 @@ func chooseLanguage() string {
 
 		choose := readIntFromStdin()
 		if choose == -1 {
+			if l == "Auto Detected" {
+				return ""
+			}
+
 			return l
 		}
 
@@ -219,7 +224,7 @@ func selectVoiceLanguage() string {
 	languages := tempSpeechSynthesis.GetAllSupportLanguage()
 	l := "unknown"
 	for !languages[l] {
-		fmt.Println("First Inpput the language name HAL speaking (BCP-47 format, more details see https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=tts):")
+		fmt.Println("First Input the language name HAL speaking (BCP-47 format, more details see https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=tts):")
 		l = readStringFromStdin()
 	}
 	tempSpeechSynthesis.Close()

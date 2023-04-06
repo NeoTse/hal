@@ -16,6 +16,8 @@ func TestPrompt(t *testing.T) {
 	cg := NewChatGPT(PARAMS.OpenaiKey, PARAMS.ChatgptModel)
 	cg.SetRole("你是我的翻译，负责将中文翻译为英文。")
 	cg.SetMaxHistory(2)
+	assert.Equal(t, "你是我的翻译，负责将中文翻译为英文。", cg.System.Content)
+	assert.Equal(t, "system", cg.System.Role)
 	message, tokens, err := cg.Prompt("人工智能技术正在蓬勃发展。")
 	assert.Nil(t, err)
 	fmt.Println(message)

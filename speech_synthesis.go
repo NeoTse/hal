@@ -58,7 +58,9 @@ func (r *speechSynthesisResult) CloseStream() {
 	close(r.subtitles)
 	close(r.finished)
 	close(r.cancelled)
-	close(r.outcome)
+	if r.outcome != nil {
+		close(r.outcome)
+	}
 }
 
 func (r *speechSynthesisResult) Error() error {
