@@ -14,7 +14,7 @@
 ### 1. Install
 
 ```bash
-git clone https://www.github.com/neotse/hal
+git clone https://github.com/neotse/hal.git
 cd hal
 chmod +x install.sh
 ./install.sh
