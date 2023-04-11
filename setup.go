@@ -302,19 +302,20 @@ func createSession() {
 }
 
 func SelectSession() {
-	sessions := CHATGPTS.Sessions()
-	var b strings.Builder
-	for i, session := range sessions {
-		b.WriteString(fmt.Sprintf("%d. %s", i+1, session))
-	}
+	sessions := CHATGPTS.SessionsWithout("hooks")
+	sessionList := listSessionWithIndex(sessions)
 
 	var idx int
 	for idx < 1 || idx > len(sessions) {
-		fmt.Println("Please select a session to start:")
-		fmt.Println(b.String())
+		fmt.Println("Please select a session to start (0 for quit):")
+		fmt.Println(sessionList)
 		idx = readIntFromStdin()
+		if idx == 0 {
+			return
+		}
 	}
 
+	fmt.Println("Ok, it selected. List current sessions:")
 	ListSessions()
 	CHATGPTS.SetDefaultGPT(sessions[idx-1])
 	CHATGPTS.SaveChatGPTs("sessions.json")
@@ -322,12 +323,16 @@ func SelectSession() {
 
 func ListSessions() {
 	for name, c := range CHATGPTS.Clients {
+		if name == "hooks" {
+			continue
+		}
+
 		var content string
 		if c.System != nil {
 			content = c.System.Content
 		}
 
-		var flag string
+		flag := " "
 		if c.IsDefault {
 			flag = "✓"
 		}
@@ -336,18 +341,83 @@ func ListSessions() {
 	}
 }
 
-func ConfigSession() {
-	sessions := CHATGPTS.Sessions()
+func listSessionWithIndex(sessions []string) string {
 	var b strings.Builder
 	for i, session := range sessions {
-		b.WriteString(fmt.Sprintf("%d. %s", i+1, session))
+		var d string
+		if CHATGPTS.Clients[session].IsDefault {
+			d = "[default] "
+		}
+
+		b.WriteString(fmt.Sprintf("%d. %s%s", i+1, d, session))
+		if i != len(sessions)-1 {
+			b.WriteByte('\n')
+		}
 	}
+
+	return b.String()
+}
+
+func DeleteSession() {
+	sessions := CHATGPTS.SessionsWithout("hooks")
+	sessionList := listSessionWithIndex(sessions)
 
 	var idx int
 	for idx < 1 || idx > len(sessions) {
-		fmt.Println("Please select a session to config:")
-		fmt.Println(b.String())
+		fmt.Println("Please select a session to delete (0 for quit):")
+		fmt.Println(sessionList)
 		idx = readIntFromStdin()
+		if idx == 0 {
+			return
+		}
+	}
+
+	choice := "unknown"
+	for choice != "n" && choice != "no" && choice != "y" && choice != "yes" {
+		fmt.Println("Are you sure delete this session (yes/no)")
+		choice = strings.ToLower(readStringFromStdin())
+	}
+
+	if choice == "n" || choice == "no" {
+		return
+	}
+
+	name := sessions[idx-1]
+	session := CHATGPTS.Clients[name]
+
+	if session.IsDefault && len(sessions) > 1 {
+		// remove the session will be deleted.
+		sessions = append(sessions[:idx-1], sessions[idx:]...)
+		sessionList = listSessionWithIndex(sessions)
+
+		var idx int
+		for idx < 1 || idx > len(sessions) {
+			fmt.Println("The session to be deleted is default, if you want to delete it, please select another session as default:")
+			fmt.Println(sessionList)
+			idx = readIntFromStdin()
+		}
+
+		CHATGPTS.SetDefaultGPT(sessions[idx-1])
+	}
+	delete(CHATGPTS.Clients, name)
+	fmt.Println("Ok, it deleted. List current sessions:")
+	ListSessions()
+
+	CHATGPTS.SaveChatGPTs("sessions.json")
+}
+
+func ConfigSession() {
+	sessions := CHATGPTS.SessionsWithout("hooks")
+	sessionList := listSessionWithIndex(sessions)
+
+	var idx int
+	for idx < 1 || idx > len(sessions) {
+		fmt.Println("Please select a session to config (0 for quit):")
+		fmt.Println(sessionList)
+		idx = readIntFromStdin()
+		if idx == 0 {
+			return
+		}
 	}
 
 	name := sessions[idx-1]
@@ -390,6 +460,7 @@ func ConfigSession() {
 		}
 	}
 
+	fmt.Println("Ok, it configured.")
 	CHATGPTS.SaveChatGPTs("sessions.json")
 }
 

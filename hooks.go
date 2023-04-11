@@ -16,6 +16,9 @@ func init() {
 
 	temp4 := &configSessionHook{}
 	HOOKS.registerHookInstance(temp4.Name(), temp4)
+
+	temp5 := &deleteSessionHook{}
+	HOOKS.registerHookInstance(temp5.Name(), temp5)
 }
 
 type defaultHook struct {
@@ -37,7 +40,7 @@ type createSessionHook struct {
 
 func (h *createSessionHook) New() Hook {
 	res := &createSessionHook{}
-	res.name = h.name
+	res.name = h.Name()
 	res.keyword = h.keyword
 
 	return res
@@ -61,7 +64,7 @@ type listSessionHook struct {
 
 func (h *listSessionHook) New() Hook {
 	res := &listSessionHook{}
-	res.name = h.name
+	res.name = h.Name()
 	res.keyword = h.keyword
 
 	return res
@@ -85,7 +88,7 @@ type selectSessionHook struct {
 
 func (h *selectSessionHook) New() Hook {
 	res := &selectSessionHook{}
-	res.name = h.name
+	res.name = h.Name()
 	res.keyword = h.keyword
 
 	return res
@@ -109,7 +112,7 @@ type configSessionHook struct {
 
 func (h *configSessionHook) New() Hook {
 	res := &configSessionHook{}
-	res.name = h.name
+	res.name = h.Name()
 	res.keyword = h.keyword
 
 	return res
@@ -124,5 +127,29 @@ func (h *configSessionHook) Name() string {
 
 func (h *configSessionHook) Exec() error {
 	ConfigSession()
+	return nil
+}
+
+type deleteSessionHook struct {
+	defaultHook
+}
+
+func (h *deleteSessionHook) New() Hook {
+	res := &deleteSessionHook{}
+	res.name = h.Name()
+	res.keyword = h.keyword
+
+	return res
+}
+
+func (h *deleteSessionHook) Name() string {
+	if h.name == "" {
+		h.name = "deleteSession"
+	}
+	return h.name
+}
+
+func (h *deleteSessionHook) Exec() error {
+	DeleteSession()
 	return nil
 }

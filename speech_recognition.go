@@ -61,6 +61,10 @@ func (s speechRecognitionResult) Close() {
 
 func newSpeechConfig(key, region string) (*speech.SpeechConfig, error) {
 	speechConfig, err := speech.NewSpeechConfigFromSubscription(key, region)
+	if err != nil {
+		return nil, err
+	}
+
 	speechConfig.SetProperty(common.SegmentationSilenceTimeoutMs, SegmentationSilenceTimeoutMs)
 	speechConfig.SetProperty(common.SpeechServiceConnectionInitialSilenceTimeoutMs, SpeechServiceConnectionInitialSilenceTimeoutMs)
 

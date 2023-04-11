@@ -80,6 +80,8 @@ Usage of session:
         config the 'session' for talk. 
   -create
         create the 'session' for talk. 
+  -delete
+        delete the 'session' for talk. 
   -list
         list current chatgpt sessions.
   -select
@@ -88,39 +90,12 @@ Usage of session:
 
 ### Configuration by voice
 
-When running, you can speak the keyword to invoke corresponding the configure process. keywords can be configured in `hooks.json`.
+When running, you can say the keyword (or similar in meaning) to invoke corresponding the action.
 
-```json
-{
- "hookConfigs": {
-  "33d1e35c6624f0a9e71b2da03b3edd09f47d90f0": {
-   "keyword": "select session.",
-   "hook": "selectSession",
-   "enable": true
-  },
-  "4ac145c3fda39261b967a576d0a6c42f700f22d6": {
-   "keyword": "list session.",
-   "hook": "listSession",
-   "enable": true
-  },
-  "a24b1dcfccea7a9ca7b4c47256329a3130531745": {
-   "keyword": "create session.",
-   "hook": "createSession",
-   "enable": true
-  },
-  "ac22cf93de68068ed942ea5d6d59646d62328c29": {
-   "keyword": "configure session.",
-   "hook": "configSession",
-   "enable": true
-  }
- }
-}
-```
-
-There are a few things to note here:
-
-1. the `keyword` is case insensitive
-2. the `hook` is case sensitive
-3. a `hook` can have multi keywords, every keyword has one configurtion item. That means multi keywords can activate this `hook`
-4. a `keyword` can also have multi hooks, every keyword has one configurtion item. That means multi hooks can activated by this `keyword`
-5. when the keyword is exactly equal to the text of STT (speach to text), the hook execute.
+| **action** | **keyword**       | **for example (other languages are also supported)**              |
+|------------|-------------------|----------------------------|
+| list       | list sessions     | please list the sessions   |
+| select     | select session    | I want to select a session |
+| delete     | delete session    | delete a session           |
+| create     | create session    | help me create a session   |
+| config     | configure session | configure the session      |

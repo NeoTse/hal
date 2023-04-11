@@ -26,12 +26,14 @@ type HookConfig struct {
 	instance Hook   `json:"-"`
 }
 
-var ErrRepeatConfig = errors.New("found a same config")
+var (
+	ErrRepeatConfig = errors.New("found a same config")
+	ErrNoSuchHook   = errors.New("hook not exists")
+)
 
 type Hooks struct {
 	Configs   map[string]*HookConfig `json:"hookConfigs"`
 	instances map[string]Hook        `json:"-"`
-	matched   int                    `json:"-"`
 }
 
 func newHooks() *Hooks {
@@ -41,24 +43,21 @@ func newHooks() *Hooks {
 	}
 }
 
-func (h *Hooks) Exec(text string) error {
-	var err error
-	h.matched = 0
-	for _, c := range h.Configs {
-		if c.Enable && c.instance.Check(text) {
-			h.matched++
-			err = c.instance.Exec()
-			if err != nil {
-				break
-			}
-		}
+func (h *Hooks) IsExist(hookName string) bool {
+	if _, ok := h.instances[hookName]; ok {
+		return true
 	}
 
-	return err
+	return false
 }
 
-func (h *Hooks) Matched() bool {
-	return h.matched > 0
+func (h *Hooks) Exec(hookName string) error {
+	hook := h.instances[hookName]
+	if hook == nil {
+		return ErrNoSuchHook
+	}
+
+	return hook.Exec()
 }
 
 func (h *Hooks) Get(id string) *HookConfig {

@@ -131,7 +131,7 @@ func (c *ChatGPT) Prompt(text string) (string, int, error) {
 	resp, err := c.client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model:    openai.GPT3Dot5Turbo,
+			Model:    c.Model,
 			Messages: c.buildMessages(text),
 		},
 	)
@@ -245,6 +245,19 @@ func (c ChatGPTs) RenameSession(oldName string, newName string) *ChatGPT {
 func (c ChatGPTs) Sessions() []string {
 	var res []string
 	for k := range c.Clients {
+		res = append(res, k)
+	}
+
+	return res
+}
+
+func (c ChatGPTs) SessionsWithout(name string) []string {
+	var res []string
+	for k := range c.Clients {
+		if k == name {
+			continue
+		}
+
 		res = append(res, k)
 	}
 

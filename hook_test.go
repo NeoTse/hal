@@ -23,6 +23,9 @@ func init() {
 	temp4 := &configSessionHook{}
 	testHooks.registerHookInstance(temp4.Name(), temp4)
 
+	temp5 := &deleteSessionHook{}
+	testHooks.registerHookInstance(temp5.Name(), temp5)
+
 	testHooks.Add("create session", "createSession")
 	testHooks.Add("list session", "listSession")
 	testHooks.Add("select session", "selectSession")
@@ -48,8 +51,8 @@ func TestGetHook(t *testing.T) {
 }
 
 func TestAddHook(t *testing.T) {
-	assert.ErrorIs(t, HOOKS.Add("configure session", "configSession"), ErrRepeatConfig)
-	assert.Nil(t, HOOKS.Add("configure Session", "configSession"))
+	assert.ErrorIs(t, testHooks.Add("configure session", "configSession"), ErrRepeatConfig)
+	assert.Nil(t, testHooks.Add("delete session", "deleteSession"))
 }
 
 func TestDeleteHook(t *testing.T) {
@@ -92,6 +95,7 @@ func TestLoadHooks(t *testing.T) {
 	assert.Nil(t, err)
 
 	temp := newHooks()
+	temp.instances = testHooks.instances
 
 	err = temp.LoadHooks(f.Name())
 	fmt.Println(temp)

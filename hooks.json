@@ -1,22 +1,27 @@
 {
  "hookConfigs": {
   "33d1e35c6624f0a9e71b2da03b3edd09f47d90f0": {
-   "keyword": "select session.",
+   "keyword": "select session",
    "hook": "selectSession",
    "enable": true
   },
+  "3f6392f4f40b96d5753c5638f2227f42d77773cc": {
+   "keyword": "delete session",
+   "hook": "deleteSession",
+   "enable": true
+  },
   "4ac145c3fda39261b967a576d0a6c42f700f22d6": {
-   "keyword": "list session.",
+   "keyword": "list session",
    "hook": "listSession",
    "enable": true
   },
   "a24b1dcfccea7a9ca7b4c47256329a3130531745": {
-   "keyword": "create session.",
+   "keyword": "create session",
    "hook": "createSession",
    "enable": true
   },
   "ac22cf93de68068ed942ea5d6d59646d62328c29": {
-   "keyword": "configure session.",
+   "keyword": "configure session",
    "hook": "configSession",
    "enable": true
   }

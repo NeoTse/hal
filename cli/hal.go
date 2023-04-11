@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	hal "github.com/neotse/hal"
+	"github.com/sashabaranov/go-openai"
 )
 
 func init() {
@@ -25,6 +26,7 @@ var (
 	slient        bool
 	listSession   bool
 	selectSession bool
+	deleteSession bool
 	createSession bool
 	configSession bool
 	maxHistory    int
@@ -50,6 +52,7 @@ func parseArgs() bool {
 	flag.StringVar(&stopWord, "stopWord", "", "the keyword used to deactivate HAL.")
 	session := flag.NewFlagSet("session", flag.ExitOnError)
 	session.BoolVar(&listSession, "list", false, "list current chatgpt sessions.")
+	session.BoolVar(&deleteSession, "delete", false, "delete the 'session' for talk. ")
 	session.BoolVar(&selectSession, "select", false, "select the 'session' for start to talk. If not set, it will select the session recently used.")
 	session.BoolVar(&createSession, "create", false, "create the 'session' for talk. ")
 	session.BoolVar(&configSession, "config", false, "config the 'session' for talk. ")
@@ -70,6 +73,9 @@ func parseArgs() bool {
 
 	if listSession {
 		hal.ListSessions()
+		return true
+	} else if deleteSession {
+		hal.DeleteSession()
 		return true
 	} else if selectSession {
 		hal.SelectSession()
@@ -215,6 +221,8 @@ func main() {
 		cg.IsDefault = true
 	}
 
+	initHooksChatGPT()
+
 	hal.CHATGPTS.SaveChatGPTs("sessions.json")
 
 	fmt.Printf("ChatGPT Initialized. Name: %s, Model: %s\n", name, cg.Model)
@@ -256,10 +264,7 @@ func main() {
 				break
 			}
 
-			err = hal.HOOKS.Exec(text)
-			if err != nil {
-				panic(err)
-			} else if hal.HOOKS.Matched() {
+			if hook(text) {
 				continue
 			}
 
@@ -296,4 +301,60 @@ func main() {
 			fmt.Println()
 		}
 	}
+}
+
+func initHooksChatGPT() {
+	hooks := hal.CHATGPTS.NewSessionWithName("hooks", hal.PARAMS.OpenaiKey, openai.GPT3Dot5Turbo) // fix model
+	if hooks.System != nil {
+		return
+	}
+
+	var b strings.Builder
+	b.WriteString("keep these items in mind, I'll need them later:\n")
+	for _, config := range hal.HOOKS.Configs {
+		b.WriteString(fmt.Sprintf("keyword: %s\n", config.Keyword))
+		b.WriteString(fmt.Sprintf("hook: %s\n", config.HookName))
+	}
+
+	_, _, err := hooks.Prompt(b.String())
+	if err != nil {
+		panic("init hooks: " + err.Error())
+	}
+
+	_, _, err = hooks.Prompt("I will send you some keywords, and you only need to output just the value of the corresponding hook. If the keywords is not in the provided item, just output unknown.")
+	if err != nil {
+		panic("init hooks: " + err.Error())
+	}
+
+	_, _, err = hooks.Prompt("and please remember that I only have the value of the hook, no other output is required")
+	if err != nil {
+		panic("init hooks: " + err.Error())
+	}
+	// freeze history
+	hooks.SetMaxHistory(0)
+}
+
+func hook(text string) bool {
+	hooks := hal.CHATGPTS.Clients["hooks"]
+	resp, _, err := hooks.Prompt(text)
+	if err != nil {
+		panic(err)
+	}
+
+	hook := strings.Trim(resp, " \n")
+
+	if strings.ToLower(hook) == "unknown" {
+		return false
+	}
+
+	if !hal.HOOKS.IsExist(hook) {
+		return false
+	}
+
+	err = hal.HOOKS.Exec(hook)
+	if err != nil {
+		panic(err)
+	}
+
+	return true
 }
