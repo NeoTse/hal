@@ -228,7 +228,7 @@ func main() {
 	fmt.Printf("ChatGPT Initialized. Name: %s, Model: %s\n", name, cg.Model)
 
 	for {
-		fmt.Printf("Say %s activate and Say %s deactivate\n", sk.KeyWord, hal.PARAMS.StopWord)
+		fmt.Printf("Say %s activate and Say %s deactivate. Ctrl+C to quit\n", sk.KeyWord, hal.PARAMS.StopWord)
 		r, err := sk.Result()
 		if err != nil {
 			panic(err)
@@ -305,7 +305,7 @@ func main() {
 
 func initHooksChatGPT() {
 	hooks := hal.CHATGPTS.NewSessionWithName("hooks", hal.PARAMS.OpenaiKey, openai.GPT3Dot5Turbo) // fix model
-	if hooks.System != nil {
+	if hooks != nil {
 		return
 	}
 

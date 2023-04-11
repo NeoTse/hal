@@ -105,7 +105,7 @@ func (c *ChatGPT) addResponseToHistory(text string) {
 	// if chatgpt with an error response ,delete the prompt from history
 	if text == "" {
 		if len(c.History) > 0 {
-			tlog.Errorf("chatGPT with Broken response, delete the prompt from history: %s", c.History[len(c.History)-1])
+			tlog.Errorf("chatGPT with Broken response, delete the prompt from history: %s", *c.History[len(c.History)-1])
 			c.History = c.History[:len(c.History)-1]
 		}
 
